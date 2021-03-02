@@ -1,0 +1,6 @@
+bin/
+html/
+lib/
+pyvenv.cfg
+*~
+.*.swp

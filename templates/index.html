@@ -1,0 +1,12 @@
+<html>
+<head>
+<title>{{ osis_title }}</title>
+</head>
+<body>
+<h1>{{ osis_title }}</h1>
+<h2>Old Testament</h2>
+<ol>{% for book in ot %}<li><a href="{{ book.filename }}">{{ book.longname }}</a></li>{% endfor %}</ol>
+<h2>New Testament</h2>
+<ol>{% for book in nt %}<li><a href="{{ book.filename }}">{{ book.longname }}</a></li>{% endfor %}</ol>
+</body>
+</html>
