@@ -87,6 +87,7 @@ Footnote = 0
 CarriedVerse = None
 InParagraph = False
 LastNode = None
+QuoteLevel = 0
 def doc2html(node) :
   return xml2html(node) + endParaIfNeeded()
 def xml2html(node, inTitle = False) :
@@ -124,6 +125,9 @@ def xml2html(node, inTitle = False) :
     return (beginParaIfNeeded() if not inTitle else '') + carried_verse + '<em>' + ''.join(xml2html(x, inTitle) for x in node.childNodes) + '</em>'
   elif node.nodeName == 'divineName' :
     return (beginParaIfNeeded() if not inTitle else '') + '<span class="divineName">' + ''.join(xml2html(x, inTitle) for x in node.childNodes) + '</span>'
+  elif node.nodeName == 'q' :
+    quote_type = node.getAttribute('type')
+    return (beginParaIfNeeded() if not inTitle else '') + beginQuote(quote_type) + ''.join(xml2html(x, inTitle) for x in node.childNodes) + endQuote(quote_type)
   elif node.nodeName == 'note' :
     sup = chr(ord('a') + Footnote)
     Footnote += 1
@@ -155,6 +159,14 @@ def endParaIfNeeded() :
     return '</p>'
   else :
     return ''
+def beginQuote(qtype) :
+  global QuoteLevel
+  QuoteLevel += 1
+  return '<blockquote>' if qtype == 'block' else ('&ldquo;' if QuoteLevel % 2 == 1 else '&lsquo;')
+def endQuote(qtype) :
+  global QuoteLevel
+  QuoteLevel -= 1
+  return '</blockquote>' if qtype == 'block' else ('&rdquo;' if QuoteLevel % 2 == 0 else '&rsquo;')
 
 if len(sys.argv) != 3 :
   print("Usage: osis2html.py bible.xml outfolder")
