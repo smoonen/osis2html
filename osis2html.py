@@ -116,7 +116,7 @@ def xml2html(node, inTitle = False) :
     # But even then, don't emit the verse number immediately.
     # Sometimes there is a following title or milestone element we want to emit first.
     if node.hasAttribute('sID') :
-      CarriedVerse = '<a name="' + node.getAttribute('sID') + '"><sup>' + node.getAttribute('sID').split('.')[-1] + '</sup></a>'
+      CarriedVerse = '<a name="' + node.getAttribute('sID') + '"><sup class="verseNum">' + node.getAttribute('sID').split('.')[-1] + '</sup></a>'
     return ''
   elif node.nodeName == 'milestone' :
     if node.getAttribute('type') in ('x-p', 'x-extra-p') : return (endParaIfNeeded() + (beginPara() if carried_verse else '') if not inTitle else '') + carried_verse
