@@ -83,90 +83,96 @@ Books = [Book('Gen', 'Genesis', Testament.OT),
          Book('Jude', 'Jude', Testament.NT),
          Book('Rev', 'Revelation', Testament.NT) ]
 
-Footnote = 0
-CarriedVerse = None
-InParagraph = False
-LastNode = None
-QuoteLevel = 0
-def doc2html(node) :
-  return xml2html(node) + endParaIfNeeded()
-def xml2html(node, inTitle = False) :
-  global Footnote, CarriedVerse, LastNode
+class Transformer :
+  def __init__(self) :
+    self.Footnote = 0
+    self.CarriedVerse = None
+    self.InParagraph = False
+    self.LastNode = None
+    self.QuoteLevel = 0
 
-  if CarriedVerse :
-    carried_verse = CarriedVerse
-    CarriedVerse = None
-  else :
-    carried_verse = ''
+  def doc2html(self, node) :
+    return self.xml2html(node) + self.endParaIfNeeded()
 
-  last_node = LastNode
-  LastNode = node.nodeName
+  def xml2html(self, node, inTitle = False) :
+    if self.CarriedVerse :
+      carried_verse = self.CarriedVerse
+      self.CarriedVerse = None
+    else :
+      carried_verse = ''
 
-  if node.nodeType == node.TEXT_NODE :
-    return (beginParaIfNeeded() if not inTitle and (carried_verse or not node.nodeValue.isspace()) else '') + carried_verse + node.nodeValue
-  elif node.nodeName == 'title' :
-    title_type = node.getAttribute('type')
-    if title_type == 'main'      : heading = 1
-    elif title_type == 'chapter' : heading = 2
-    elif title_type == 'psalm'   : heading = 3
-    else                         : heading = 4
-    return (endParaIfNeeded() if not inTitle else '') + ('<h%d>' % heading) + ''.join(xml2html(x, True) for x in node.childNodes) + ('</h%d>' % heading) + (beginPara() if not inTitle and carried_verse else '') + carried_verse
-  elif node.nodeName == 'verse' :
-    # Only emit at the start of a verse.
-    # But even then, don't emit the verse number immediately.
-    # Sometimes there is a following title or milestone element we want to emit first.
-    if node.hasAttribute('sID') :
-      CarriedVerse = '<a name="' + node.getAttribute('sID') + '"><sup class="verseNum">' + node.getAttribute('sID').split('.')[-1] + '</sup></a>'
-    return ''
-  elif node.nodeName == 'milestone' :
-    if node.getAttribute('type') in ('x-p', 'x-extra-p') : return (endParaIfNeeded() + (beginPara() if carried_verse else '') if not inTitle else '') + carried_verse
-    else                                                 : return (beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse
-  elif node.nodeName == 'transChange' :
-    return (beginParaIfNeeded() if not inTitle else '') + carried_verse + '<em>' + ''.join(xml2html(x, inTitle) for x in node.childNodes) + '</em>'
-  elif node.nodeName == 'divineName' :
-    return (beginParaIfNeeded() if not inTitle else '') + '<span class="divineName">' + ''.join(xml2html(x, inTitle) for x in node.childNodes) + '</span>'
-  elif node.nodeName == 'q' :
-    quote_type = node.getAttribute('type')
-    return (beginParaIfNeeded() if not inTitle else '') + beginQuote(quote_type) + ''.join(xml2html(x, inTitle) for x in node.childNodes) + endQuote(quote_type)
-  elif node.nodeName == 'note' :
-    sup = chr(ord('a') + Footnote)
-    Footnote += 1
-    if Footnote == 26 :
-      Footnote = 0
-    return (beginParaIfNeeded() if not inTitle else '') + (' ' if last_node == 'note' else '') + '<sup title="' + ''.join(xml2text(x) for x in node.childNodes) + '">' + sup + '</sup>'
-  else :
-    return (beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + ''.join(xml2html(x, inTitle) for x in node.childNodes)
-def xml2text(node) :
-  if node.nodeType == node.TEXT_NODE :
-    return node.nodeValue
-  else :
-    return ''.join(xml2text(x) for x in node.childNodes)
-def beginPara() :
-  global InParagraph
-  InParagraph = True
-  return '<p>'
-def beginParaIfNeeded() :
-  global InParagraph
-  if not InParagraph :
-    InParagraph = True
+    last_node = self.LastNode
+    self.LastNode = node.nodeName
+
+    if node.nodeType == node.TEXT_NODE :
+      return (self.beginParaIfNeeded() if not inTitle and (carried_verse or not node.nodeValue.isspace()) else '') + carried_verse + node.nodeValue
+    elif node.nodeName == 'title' :
+      title_type = node.getAttribute('type')
+      if title_type == 'main'      : heading = 1
+      elif title_type == 'chapter' : heading = 2
+      elif title_type == 'psalm'   : heading = 3
+      else                         : heading = 4
+      return (self.endParaIfNeeded() if not inTitle else '') + ('<h%d>' % heading) + ''.join(self.xml2html(x, True) for x in node.childNodes) + ('</h%d>' % heading) + (self.beginPara() if not inTitle and carried_verse else '') + carried_verse
+    elif node.nodeName == 'verse' :
+      # Only emit at the start of a verse.
+      # But even then, don't emit the verse number immediately.
+      # Sometimes there is a following title or milestone element we want to emit first.
+      if node.hasAttribute('sID') :
+        self.CarriedVerse = '<a name="' + node.getAttribute('sID') + '"><sup class="verseNum">' + node.getAttribute('sID').split('.')[-1] + '</sup></a>'
+      return ''
+    elif node.nodeName == 'milestone' :
+      if node.getAttribute('type') in ('x-p', 'x-extra-p') : return (self.endParaIfNeeded() + (self.beginPara() if carried_verse else '') if not inTitle else '') + carried_verse
+      else                                                 : return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse
+    elif node.nodeName == 'transChange' :
+      return (self.beginParaIfNeeded() if not inTitle else '') + carried_verse + '<em>' + ''.join(self.xml2html(x, inTitle) for x in node.childNodes) + '</em>'
+    elif node.nodeName == 'divineName' :
+      return (self.beginParaIfNeeded() if not inTitle else '') + '<span class="divineName">' + ''.join(self.xml2html(x, inTitle) for x in node.childNodes) + '</span>'
+    elif node.nodeName == 'q' :
+      quote_type = node.getAttribute('type')
+      return (self.beginParaIfNeeded() if not inTitle else '') + self.beginQuote(quote_type) + ''.join(self.xml2html(x, inTitle) for x in node.childNodes) + self.endQuote(quote_type)
+    elif node.nodeName == 'note' :
+      if node.getAttribute('type') == 'x-strongsMarkup' :
+        return ''
+      else :
+        sup = chr(ord('a') + self.Footnote)
+        self.Footnote += 1
+        if self.Footnote == 26 :
+          self.Footnote = 0
+        return (self.beginParaIfNeeded() if not inTitle else '') + (' ' if last_node == 'note' else '') + '<sup title="' + ''.join(self.xml2text(x) for x in node.childNodes) + '">' + sup + '</sup>'
+    else :
+      return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + ''.join(self.xml2html(x, inTitle) for x in node.childNodes)
+
+  def xml2text(self, node) :
+    if node.nodeType == node.TEXT_NODE :
+      return node.nodeValue
+    else :
+      return ''.join(self.xml2text(x) for x in node.childNodes)
+
+  def beginPara(self) :
+    self.InParagraph = True
     return '<p>'
-  else :
-    return ''
-def endParaIfNeeded() :
-  global InParagraph
-  if InParagraph :
-    InParagraph = False
-    return '</p>'
-  else :
-    return ''
-def beginQuote(qtype) :
-  global QuoteLevel
-  QuoteLevel += 1
-  return '<blockquote>' if qtype == 'block' else ('&ldquo;' if QuoteLevel % 2 == 1 else '&lsquo;')
-def endQuote(qtype) :
-  global QuoteLevel
-  QuoteLevel -= 1
-  return '</blockquote>' if qtype == 'block' else ('&rdquo;' if QuoteLevel % 2 == 0 else '&rsquo;')
+
+  def beginParaIfNeeded(self) :
+    if not self.InParagraph :
+      self.InParagraph = True
+      return '<p>'
+    else :
+      return ''
+
+  def endParaIfNeeded(self) :
+    if self.InParagraph :
+      self.InParagraph = False
+      return '</p>'
+    else :
+      return ''
+
+  def beginQuote(self, qtype) :
+    self.QuoteLevel += 1
+    return '<blockquote>' if qtype == 'block' else ('&ldquo;' if self.QuoteLevel % 2 == 1 else '&lsquo;')
+
+  def endQuote(self, qtype) :
+    self.QuoteLevel -= 1
+    return '</blockquote>' if qtype == 'block' else ('&rdquo;' if self.QuoteLevel % 2 == 0 else '&rsquo;')
 
 if len(sys.argv) != 3 :
   print("Usage: osis2html.py bible.xml outfolder")
@@ -198,7 +204,7 @@ for book in Books :
   book_title = book.node.getElementsByTagName('title')[0].firstChild.nodeValue
   variables = { 'book'       : book,
                 'book_title' : book_title,
-                'body'       : jinja2.Markup(doc2html(book.node)) }
+                'body'       : jinja2.Markup(Transformer().doc2html(book.node)) }
   bookFile.write(jenv.get_template('book.html').render(variables))
   bookFile.close()
 
