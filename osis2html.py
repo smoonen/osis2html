@@ -123,6 +123,8 @@ class Transformer :
     elif node.nodeName == 'milestone' :
       if node.getAttribute('type') in ('x-p', 'x-extra-p') : return (self.endParaIfNeeded() + (self.beginPara() if carried_verse else '') if not inTitle else '') + carried_verse
       else                                                 : return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse
+    elif node.nodeName == 'hi' :
+      return (self.beginParaIfNeeded() if not inTitle else '') + carried_verse + '<strong>' + ''.join(self.xml2html(x, inTitle) for x in node.childNodes) + '</strong>'
     elif node.nodeName == 'transChange' :
       return (self.beginParaIfNeeded() if not inTitle else '') + carried_verse + '<em>' + ''.join(self.xml2html(x, inTitle) for x in node.childNodes) + '</em>'
     elif node.nodeName == 'divineName' :
