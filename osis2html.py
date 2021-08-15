@@ -141,6 +141,14 @@ class Transformer :
         if self.Footnote == 26 :
           self.Footnote = 0
         return (self.beginParaIfNeeded() if not inTitle else '') + (' ' if last_node == 'note' else '') + '<sup title="' + ''.join(self.xml2text(x) for x in node.childNodes) + '">' + sup + '</sup>'
+    elif node.nodeName == 'w' :
+      morph = node.getAttribute('morph')
+      if 'singular' in morph :
+        return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + '<span title="singular">' + ''.join(self.xml2html(x, inTitle) for x in node.childNodes) + '</span>'
+      elif 'plural' in morph :
+        return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + '<span title="plural">' + ''.join(self.xml2html(x, inTitle) for x in node.childNodes) + '</span>'
+      else :
+        return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + ''.join(self.xml2html(x, inTitle) for x in node.childNodes)
     else :
       return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + ''.join(self.xml2html(x, inTitle) for x in node.childNodes)
 
