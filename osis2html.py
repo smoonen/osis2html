@@ -2,6 +2,7 @@
 
 from enum import Enum
 import jinja2
+import markupsafe
 import os, os.path
 import sys
 import xml.dom.minidom
@@ -214,7 +215,7 @@ for book in Books :
   book_title = book.node.getElementsByTagName('title')[0].firstChild.nodeValue
   variables = { 'book'       : book,
                 'book_title' : book_title,
-                'body'       : jinja2.Markup(Transformer().doc2html(book.node)) }
+                'body'       : markupsafe.Markup(Transformer().doc2html(book.node)) }
   bookFile.write(jenv.get_template('book.html').render(variables))
   bookFile.close()
 
