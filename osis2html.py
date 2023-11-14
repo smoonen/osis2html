@@ -159,8 +159,8 @@ class Transformer :
       return collect
     elif node.nodeName == 'l' :
       lineType = node.getAttribute('type')
-      if 'selah' in lineType :
-        divClass = 'selah'
+      if lineType in ('selah', 'doxology') :
+        divClass = lineType
       else :
         divClass = 'firstLine'
       return carried_verse + '<div class="' + divClass + '">' + ''.join(self.xml2html(x, False) for x in node.childNodes) + '</div>'
