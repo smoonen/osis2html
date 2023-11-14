@@ -89,6 +89,7 @@ class Transformer :
     self.Footnote = 0
     self.CarriedVerse = None
     self.InParagraph = False
+    self.InLineGroup = False
     self.LastNode = None
     self.QuoteLevel = 0
 
@@ -150,6 +151,21 @@ class Transformer :
         return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + '<span title="plural">' + ''.join(self.xml2html(x, inTitle) for x in node.childNodes) + '</span>'
       else :
         return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + ''.join(self.xml2html(x, inTitle) for x in node.childNodes)
+    elif node.nodeName == 'lg' :
+      # OSIS allows for nested line groups but we aren't utilizing that.
+      self.InLineGroup = True
+      collect = carried_verse + '<div class="stanza">' + ''.join(self.xml2html(x, False) for x in node.childNodes) + '</div>'
+      self.InLineGroup = False
+      return collect
+    elif node.nodeName == 'l' :
+      lineType = node.getAttribute('type')
+      if 'selah' in lineType :
+        divClass = 'selah'
+      else :
+        divClass = 'firstLine'
+      return carried_verse + '<div class="' + divClass + '">' + ''.join(self.xml2html(x, False) for x in node.childNodes) + '</div>'
+    elif node.nodeName == 'lb' :
+      return carried_verse + '</div><div class="secondaryLine">'
     else :
       return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + ''.join(self.xml2html(x, inTitle) for x in node.childNodes)
 
@@ -160,18 +176,24 @@ class Transformer :
       return ''.join(self.xml2text(x) for x in node.childNodes)
 
   def beginPara(self) :
+    if self.InLineGroup :
+      return ''
     self.InParagraph = True
     return '<p>'
 
   def beginParaIfNeeded(self) :
-    if not self.InParagraph :
+    if self.InLineGroup :
+      return ''
+    elif not self.InParagraph :
       self.InParagraph = True
       return '<p>'
     else :
       return ''
 
   def endParaIfNeeded(self) :
-    if self.InParagraph :
+    if self.InLineGroup :
+      return ''
+    elif self.InParagraph :
       self.InParagraph = False
       return '</p>'
     else :
