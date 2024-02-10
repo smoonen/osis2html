@@ -133,7 +133,7 @@ class Transformer :
       return (self.beginParaIfNeeded() if not inTitle else '') + '<span class="divineName">' + ''.join(self.xml2html(x, inTitle) for x in node.childNodes) + '</span>'
     elif node.nodeName == 'q' :
       quote_type = node.getAttribute('type')
-      return (self.beginParaIfNeeded() if not inTitle else '') + self.beginQuote(quote_type) + ''.join(self.xml2html(x, inTitle) for x in node.childNodes) + self.endQuote(quote_type)
+      return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + self.beginQuote(quote_type) + ''.join(self.xml2html(x, inTitle) for x in node.childNodes) + self.endQuote(quote_type)
     elif node.nodeName == 'note' :
       if node.getAttribute('type') == 'x-strongsMarkup' :
         return ''
