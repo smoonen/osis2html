@@ -134,8 +134,8 @@ class Transformer :
       return (self.beginParaIfNeeded() if not inTitle else '') + '<span class="divineName">' + ''.join(self.xml2html(x, inTitle) for x in node.childNodes) + '</span>'
     elif node.nodeName == 'q' :
       # Handle milestone quote elements
-      if node.getAttribute('sID')   : return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + self.beginQuote()
-      elif node.getAttribute('eID') : return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + self.endQuote()
+      if node.hasAttribute('sID')   : return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + self.beginQuote()
+      elif node.hasAttribute('eID') : return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + self.endQuote()
       # Handle ordinary quote element
       else :
         quote_type = node.getAttribute('type')
