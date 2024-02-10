@@ -125,9 +125,6 @@ class Transformer :
     elif node.nodeName == 'milestone' :
       # KJV text uses milestone for paragraph boundaries at times
       if node.getAttribute('type') in ('x-p', 'x-extra-p') : return (self.endParaIfNeeded() + (self.beginPara() if carried_verse else '') if not inTitle else '') + carried_verse
-      # I have invented my own milestone types for quotes that straddle lines of poetry
-      elif node.getAttribute('type') == 'x-begin-q'        : return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + self.beginQuote()
-      elif node.getAttribute('type') == 'x-end-q'          : return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + self.endQuote()
       else                                                 : return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse
     elif node.nodeName == 'hi' :
       return (self.beginParaIfNeeded() if not inTitle else '') + carried_verse + '<strong>' + ''.join(self.xml2html(x, inTitle) for x in node.childNodes) + '</strong>'
@@ -136,8 +133,13 @@ class Transformer :
     elif node.nodeName == 'divineName' :
       return (self.beginParaIfNeeded() if not inTitle else '') + '<span class="divineName">' + ''.join(self.xml2html(x, inTitle) for x in node.childNodes) + '</span>'
     elif node.nodeName == 'q' :
-      quote_type = node.getAttribute('type')
-      return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + self.beginQuote(quote_type) + ''.join(self.xml2html(x, inTitle) for x in node.childNodes) + self.endQuote(quote_type)
+      # Handle milestone quote elements
+      if node.getAttribute('sID')   : return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + self.beginQuote()
+      elif node.getAttribute('eID') : return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + self.endQuote()
+      # Handle ordinary quote element
+      else :
+        quote_type = node.getAttribute('type')
+        return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + self.beginQuote(quote_type) + ''.join(self.xml2html(x, inTitle) for x in node.childNodes) + self.endQuote(quote_type)
     elif node.nodeName == 'note' :
       if node.getAttribute('type') == 'x-strongsMarkup' :
         return ''
