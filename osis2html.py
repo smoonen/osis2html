@@ -123,7 +123,11 @@ class Transformer :
         self.CarriedVerse = '<a name="' + node.getAttribute('sID') + '"><sup class="verseNum">' + node.getAttribute('sID').split('.')[-1] + '</sup></a>'
       return ''
     elif node.nodeName == 'milestone' :
+      # KJV text uses milestone for paragraph boundaries at times
       if node.getAttribute('type') in ('x-p', 'x-extra-p') : return (self.endParaIfNeeded() + (self.beginPara() if carried_verse else '') if not inTitle else '') + carried_verse
+      # I have invented my own milestone types for quotes that straddle lines of poetry
+      elif node.getAttribute('type') == 'x-begin-q'        : return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + self.beginQuote()
+      elif node.getAttribute('type') == 'x-end-q'          : return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + self.endQuote()
       else                                                 : return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse
     elif node.nodeName == 'hi' :
       return (self.beginParaIfNeeded() if not inTitle else '') + carried_verse + '<strong>' + ''.join(self.xml2html(x, inTitle) for x in node.childNodes) + '</strong>'
@@ -199,11 +203,11 @@ class Transformer :
     else :
       return ''
 
-  def beginQuote(self, qtype) :
+  def beginQuote(self, qtype = None) :
     self.QuoteLevel += 1
     return '<blockquote>' if qtype == 'block' else ('&ldquo;' if self.QuoteLevel % 2 == 1 else '&lsquo;')
 
-  def endQuote(self, qtype) :
+  def endQuote(self, qtype = None) :
     self.QuoteLevel -= 1
     return '</blockquote>' if qtype == 'block' else ('&rdquo;' if self.QuoteLevel % 2 == 0 else '&rsquo;')
 
