@@ -158,9 +158,10 @@ class Transformer :
       else :
         return (self.beginParaIfNeeded() if not inTitle and carried_verse else '') + carried_verse + ''.join(self.xml2html(x, inTitle) for x in node.childNodes)
     elif node.nodeName == 'lg' :
+      div_class = 'stanza' if node.getAttribute('type') != 'x-doxology' else 'doxology'
       # OSIS allows for nested line groups but we aren't utilizing that.
       self.InLineGroup = True
-      collect = carried_verse + '<div class="stanza">' + ''.join(self.xml2html(x, False) for x in node.childNodes) + '</div>'
+      collect = carried_verse + '<div class="' + div_class + '">' + ''.join(self.xml2html(x, False) for x in node.childNodes) + '</div>'
       self.InLineGroup = False
       return collect
     elif node.nodeName == 'l' :
